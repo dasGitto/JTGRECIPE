@@ -1,6 +1,7 @@
 let currentStep = 0;
 const totalSteps = 6;
 let currentLang = 'km'; // Default to Khmer
+let speechUtterances = []; // Global reference to prevent Safari garbage collection
 
 const translations = {
     km: {
@@ -8,11 +9,19 @@ const translations = {
         subTitle: "រសជាតិដើមបែប Jimmy The Greek",
         ingredientsTitle: "គ្រឿងផ្សំ (គ្រឿងសម្ងាត់)",
         ingredients: [
-            "សាច់មាន់ (ទ្រូង ឬភ្លៅ បកស្បែក)",
-            "អង្ករ (គ្រាប់វែង ឬបាសម៉ាទី) សម្រាប់បាយក្រូចឆ្មា",
-            "ប្រេងអូលីវគុណភាពខ្ពស់ និងក្រូចឆ្មាស្រស់",
-            "ខ្ទឹមស, ស្លឹកអូរីហ្គាណូ, ថាម (Thyme) និងប៉ាព្រីកា",
-            "នំបុ័ងពីតា និងទឹកជ្រលក់ត្សាត្ស៊ីគី (Tzatziki)"
+            "១ គីឡូក្រាម សាច់មាន់ (ទ្រូង ឬភ្លៅ បកស្បែក)",
+            "២ ពែង អង្ករ (គ្រាប់វែង ឬបាសម៉ាទី) សម្រាប់បាយ",
+            "១/៤ ពែង ប្រេងអូលីវ និងទឹកក្រូចឆ្មា ១ ផ្លែ",
+            "ខ្ទឹមស ៣ កំពឹស, អូរីហ្គាណូ ១ ស្លាបព្រាបាយ, ថាម ១ ស្លាបព្រាកាហ្វេ",
+            "នំបុ័ងពីតា ៤ បន្ទះ"
+        ],
+        extraIngredientsTitle: "គ្រឿងផ្សំទឹកជ្រលក់ត្សាត្ស៊ីគី (Tzatziki)",
+        extraIngredients: [
+            "៥០០ ក្រាម យ៉ាអួក្រិក (Greek yogurt)",
+            "១ ផ្លែ ត្រសក់ធំ (ឈូស និងពូតទឹកចេញ)",
+            "៣ កំពឹស ខ្ទឹមសចិញ្ច្រាំ",
+            "១ ស្លាបព្រាបាយ ប្រេងអូលីវ និងទឹកក្រូចឆ្មា",
+            "២ ស្លាបព្រាកាហ្វេ ស្លឹកជីវ៉ាន់ស៊ុយ (Dill) និងអំបិល"
         ],
         startLabel: "ត្រៀមខ្លួនសម្រាប់រសជាតិមេឌីទែរ៉ាណេពិតៗ? ↓",
         steps: [
@@ -38,7 +47,7 @@ const translations = {
             },
             { 
                 title: "៦. ជំហានចុងក្រោយ និងការរៀបចំ", 
-                desc: "ទុកសាច់ឱ្យសម្រាកប៉ុន្មាននាទីសិន។ បន្ថែមស្លឹកជីវ៉ាន់ស៊ុយស្រស់ និងប្រេងអូលីវពីលើ។ រៀបជាមួយបាយក្តៅៗ និងទឹកជ្រលក់!" 
+                desc: "ទុកសាច់ឱ្យសម្រាកប៉ុន្មាននាទីសិន។ បន្ថែមស្លឹកជីវ៉ាន់ស៊ុយស្រស់ និងប្រេងអូលីវពីលើ។ រៀបជាមួយបាយក្តៅៗ និងទឹកជ្រលក់ម៉ាត្រូវម៉ាត់!" 
             }
         ],
         back: "ថយក្រោយ",
@@ -51,13 +60,21 @@ const translations = {
     en: {
         mainTitle: "Chicken Souvlaki",
         subTitle: "Authentic Jimmy The Greek Style",
-        ingredientsTitle: "The Essential Ingredients",
+        ingredientsTitle: "The Main Ingredients",
         ingredients: [
-            "Quality Chicken (Breast or Thigh)",
-            "Long-grain or Basmati Rice",
-            "Extra Virgin Olive Oil & Fresh Lemons",
-            "Garlic, Oregano, Thyme, & Paprika",
-            "Pita Bread & Tangy Tzatziki Sauce"
+            "2 lbs (1 kg) Quality Chicken (Breast or Thigh)",
+            "2 cups Long-grain or Basmati Rice",
+            "1/4 cup Olive Oil & Juice of 1 Lemon",
+            "3 cloves Garlic, 1 tbsp Oregano, 1 tsp Thyme",
+            "4 warm Pita Breads"
+        ],
+        extraIngredientsTitle: "Tzatziki Sauce Ingredients",
+        extraIngredients: [
+            "2 cups (500g) plain, thick Greek yogurt",
+            "1 large English cucumber (grated & squeezed entirely dry)",
+            "3 cloves garlic, finely minced",
+            "1 tbsp extra virgin olive oil & 1 tbsp lemon juice",
+            "2 tsp fresh dill & 1 tsp salt"
         ],
         startLabel: "Ready to transport your taste buds to Greece? ↓",
         steps: [
@@ -83,7 +100,7 @@ const translations = {
             },
             { 
                 title: "6. The Final Flourish", 
-                desc: "Let the meat rest for 5 minutes! Garnish with fresh parsley, lemon juice, and a drizzle of oil before serving over fluffy rice." 
+                desc: "Let the meat rest for 5 minutes! Garnish with fresh parsley, lemon juice, and a drizzle of oil before serving over fluffy rice and thick tzatziki." 
             }
         ],
         back: "Go Back",
@@ -109,7 +126,7 @@ function updateUI() {
     document.getElementById('mainTitle').innerText = t.mainTitle;
     document.getElementById('subTitle').innerText = t.subTitle;
     
-    // Step 0
+    // Step 0 - Main Ingredients
     document.getElementById('ingredientsTitle').innerText = t.ingredientsTitle;
     const list = document.getElementById('ingredientsList');
     list.innerHTML = "";
@@ -118,6 +135,29 @@ function updateUI() {
         li.innerText = item;
         list.appendChild(li);
     });
+    
+    // Step 0 - Extra Ingredients (Tzatziki)
+    // Check if extra title exists, if not create it
+    let extraTitle = document.getElementById('extraIngredientsTitle');
+    let extraList = document.getElementById('extraIngredientsList');
+    if (!extraTitle) {
+        extraTitle = document.createElement('h2');
+        extraTitle.id = 'extraIngredientsTitle';
+        extraTitle.style.marginTop = '20px';
+        extraList = document.createElement('ul');
+        extraList.id = 'extraIngredientsList';
+        list.parentNode.insertBefore(extraTitle, list.nextSibling);
+        list.parentNode.insertBefore(extraList, extraTitle.nextSibling);
+    }
+    
+    extraTitle.innerText = t.extraIngredientsTitle;
+    extraList.innerHTML = "";
+    t.extraIngredients.forEach(item => {
+        const li = document.createElement('li');
+        li.innerText = item;
+        extraList.appendChild(li);
+    });
+    
     document.getElementById('startLabel').innerText = t.startLabel;
     
     // Steps 1-6
@@ -170,15 +210,21 @@ function readStep() {
 }
 
 function speakText(text, lang) {
-    // Cancel any current speaking
-    window.speechSynthesis.cancel();
+    window.speechSynthesis.cancel(); // Cancel any current speaking
+    speechUtterances = []; // Clear old references to prevent memory leaks
+
+    // Chunking text by punctuation to prevent long-text cutoff on iOS Safari
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
     
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = (lang === 'km') ? 'km-KH' : 'en-US';
-    utterance.rate = 0.9; // Slightly slower for seniors
-    utterance.pitch = 1.0;
-    
-    window.speechSynthesis.speak(utterance);
+    sentences.forEach(sentence => {
+        const utterance = new SpeechSynthesisUtterance(sentence.trim());
+        utterance.lang = (lang === 'km') ? 'km-KH' : 'en-US';
+        utterance.rate = 0.9; // Slightly slower for seniors
+        utterance.pitch = 1.0;
+        
+        speechUtterances.push(utterance); // Keep in global array so it isn't garbage collected early
+        window.speechSynthesis.speak(utterance);
+    });
 }
 
 function resetSteps() {
@@ -191,3 +237,4 @@ function resetSteps() {
 
 // Initial update to ensure correct language strings
 updateUI();
+
